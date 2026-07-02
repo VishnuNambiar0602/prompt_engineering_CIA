@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- GSAP for smooth animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <!-- Background glowing ambient spots -->
@@ -292,10 +292,10 @@
                 <button class="icon-btn close-btn" id="close-settings-btn"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body">
-                <p class="modal-description">By default, IntervAI uses a highly advanced client-side simulated AI with preset questions to maintain instant response. For dynamic, personalized, and deep AI responses, connect your Gemini API Key below. Your key stays locally in your browser storage.</p>
+                <p class="modal-description">This app uses a python-based backend server. Enter your Gemini API Key below, which will be saved in the server config.json file locally for authentic dynamic interactions.</p>
                 
                 <div class="form-group">
-                    <label for="gemini-api-key">Gemini API Key (Optional)</label>
+                    <label for="gemini-api-key">Gemini API Key</label>
                     <div class="input-password-wrapper">
                         <input type="password" id="gemini-api-key" placeholder="AIzaSy...">
                         <button class="icon-btn" id="toggle-key-visibility" title="Show/Hide Key">
@@ -339,8 +339,7 @@
     </div>
 
     <!-- SCRIPTS -->
-    <script src="secrets.js"></script>
-    <script src="three-scene.js"></script>
-    <script src="app.js"></script>
+    <script src="/static/three-scene.js"></script>
+    <script src="/static/main.js"></script>
 </body>
 </html>
