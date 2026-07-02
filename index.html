@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntervAI | 3D Interactive AI Interviewer</title>
+    <!-- Google Fonts for futuristic/sleek typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Three.js for 3D graphics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for smooth animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background glowing ambient spots -->
+    <div class="ambient-glow spot-1"></div>
+    <div class="ambient-glow spot-2"></div>
+    <div class="ambient-glow spot-3"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-icon-wrapper">
+                    <div class="logo-icon"></div>
+                </div>
+                <h1>Interv<span>AI</span></h1>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator idle" id="status-dot"></span>
+                <span id="status-text">IntervAI System: Ready</span>
+            </div>
+            <div class="settings-btn-container">
+                <button class="icon-btn" id="open-settings-btn" title="API Settings">
+                    <i data-lucide="settings"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="main-content">
+            <!-- LEFT PANEL: 3D VIEWPORT & INTERACTION -->
+            <section class="viewport-panel">
+                <div class="canvas-container" id="canvas-container">
+                    <div class="canvas-overlay">
+                        <div class="ai-speech-bubble" id="ai-speech-bubble">
+                            <span class="bubble-arrow"></span>
+                            <p id="speech-bubble-text">Configure your interview on the right, and let's begin!</p>
+                        </div>
+                        <div class="model-helper-text">
+                            <i data-lucide="mouse-pointer-click"></i> Drag to rotate • Scroll to zoom • Hover to interact
+                        </div>
+                        <div class="audio-waves" id="audio-waves">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                    </div>
+                    <!-- Three.js Canvas will be appended here -->
+                </div>
+                <div class="speech-controls-panel">
+                    <button class="pill-btn secondary" id="voice-test-btn">
+                        <i data-lucide="volume-2"></i> Test AI Voice
+                    </button>
+                    <div class="toggle-container">
+                        <span class="toggle-label">Voice Response (TTS)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="tts-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: INTERFACE CHANGER (SETUP / CHAT / REPORT) -->
+            <section class="interface-panel">
+                
+                <!-- 1. INTERVIEW SETUP SCREEN -->
+                <div class="screen active" id="setup-screen">
+                    <div class="screen-header">
+                        <h2>Configure Your Mock Interview</h2>
+                        <p>Customize the interview session. Our 3D AI interviewer will adapt its questions and evaluation criteria based on your selections.</p>
+                    </div>
+
+                    <div class="setup-form">
+                        <div class="form-group">
+                            <label for="job-role"><i data-lucide="briefcase"></i> Job Role</label>
+                            <select id="job-role">
+                                <option value="software-engineer">Software Engineer (Full Stack / Backend)</option>
+                                <option value="frontend-developer">Frontend Engineer</option>
+                                <option value="product-manager">Product Manager</option>
+                                <option value="data-scientist">Data Scientist / AI Engineer</option>
+                                <option value="ui-ux-designer">UI/UX Designer</option>
+                            </select>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="interview-type"><i data-lucide="terminal"></i> Interview Type</label>
+                                <select id="interview-type">
+                                    <option value="technical">Technical / Coding & Theory</option>
+                                    <option value="behavioral">Behavioral / Leadership (STAR Method)</option>
+                                    <option value="system-design">System Design / Architecture</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="difficulty"><i data-lucide="gauge"></i> Difficulty Level</label>
+                                <select id="difficulty">
+                                    <option value="entry">Entry Level / Junior</option>
+                                    <option value="mid" selected>Mid-Career</option>
+                                    <option value="senior">Senior / Lead</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="num-questions"><i data-lucide="help-circle"></i> Number of Questions</label>
+                            <select id="num-questions">
+                                <option value="3">3 Questions (Quick Practice)</option>
+                                <option value="5" selected>5 Questions (Standard Session)</option>
+                                <option value="8">8 Questions (Comprehensive)</option>
+                            </select>
+                        </div>
+
+                        <div class="setup-note">
+                            <i data-lucide="sparkles"></i>
+                            <p><strong>Pro Tip:</strong> Enable microphone access in the chat panel to speak your answers naturally. The AI will transcribe your voice in real-time!</p>
+                        </div>
+
+                        <button class="action-btn primary" id="start-interview-btn">
+                            <span>Start Interview Session</span>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. INTERVIEW CHAT SCREEN -->
+                <div class="screen" id="chat-screen">
+                    <div class="chat-header">
+                        <div class="chat-meta">
+                            <span class="badge" id="chat-badge-role">Software Engineer</span>
+                            <span class="badge secondary" id="chat-badge-type">Technical</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-text">
+                                <span>Session Progress</span>
+                                <span id="progress-fraction">Question 1 of 5</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="progress-bar-fill" style="width: 20%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Message templates loaded programmatically -->
+                    </div>
+
+                    <!-- Voice-typing live transcript indicator -->
+                    <div class="live-transcript" id="live-transcript" style="display: none;">
+                        <span class="listening-pulse"></span>
+                        <p id="live-transcript-text">Listening...</p>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper">
+                            <textarea id="chat-input" placeholder="Type your answer here... Provide details to get a better score!" rows="2"></textarea>
+                            <div class="input-actions">
+                                <button class="action-circle-btn mic-btn" id="mic-btn" title="Toggle Voice Typing">
+                                    <i data-lucide="mic"></i>
+                                </button>
+                                <button class="action-circle-btn send-btn" id="send-btn" title="Submit Answer">
+                                    <i data-lucide="send"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="pill-btn alert" id="end-interview-early-btn">
+                                <i data-lucide="square"></i> End & Grade Interview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. REPORT CARD / ANALYTICS SCREEN -->
+                <div class="screen" id="report-screen">
+                    <div class="screen-header text-center">
+                        <div class="report-badge">
+                            <i data-lucide="award"></i>
+                        </div>
+                        <h2>Interview Feedback Report</h2>
+                        <p id="report-meta">Mid-level Software Engineer • Technical Interview</p>
+                    </div>
+
+                    <div class="report-dashboard">
+                        <!-- Score Display -->
+                        <div class="score-card">
+                            <div class="radial-progress">
+                                <svg viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="40" class="circle-bg"></circle>
+                                    <circle cx="50" cy="50" r="40" class="circle-fill" id="report-score-circle" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                </svg>
+                                <div class="score-value">
+                                    <span id="report-score-num">0</span>
+                                    <span class="pct">%</span>
+                                </div>
+                            </div>
+                            <h3 id="score-grade-text">Excellent Performance!</h3>
+                        </div>
+
+                        <!-- Skill breakdown metrics -->
+                        <div class="metrics-card">
+                            <h3>Performance Breakdown</h3>
+                            
+                            <div class="metric-row">
+                                <div class="metric-info">
+                                    <span>Accuracy & Technical Depth</span>
+                                    <span id="metric-depth-val">0%</span>
+                                </div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" id="metric-depth-fill" style="width: 0%;"></div></div>
+                            </div>
+
+                            <div class="metric-row">
+                                <div class="metric-info">
+                                    <span>Communication & Clarity</span>
+                                    <span id="metric-comm-val">0%</span>
+                                </div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" id="metric-comm-fill" style="width: 0%;"></div></div>
+                            </div>
+
+                            <div class="metric-row">
+                                <div class="metric-info">
+                                    <span>Problem Solving & Heuristics</span>
+                                    <span id="metric-problem-val">0%</span>
+                                </div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" id="metric-problem-fill" style="width: 0%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Strengths/Weaknesses summary -->
+                    <div class="feedback-summary">
+                        <div class="summary-box strength">
+                            <h4><i data-lucide="check-circle-2"></i> Key Strengths</h4>
+                            <ul id="strengths-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+                        <div class="summary-box improvement">
+                            <h4><i data-lucide="alert-triangle"></i> Areas for Improvement</h4>
+                            <ul id="improvements-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Question-by-Question Review -->
+                    <div class="qa-review-section">
+                        <h3>Detailed Questions Review</h3>
+                        <div class="qa-accordion" id="qa-accordion">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Restart Option -->
+                    <div class="report-actions">
+                        <button class="action-btn primary" id="back-to-setup-btn">
+                            <i data-lucide="refresh-cw"></i>
+                            <span>Start New Interview</span>
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i data-lucide="settings"></i> System Configuration</h3>
+                <button class="icon-btn close-btn" id="close-settings-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">By default, IntervAI uses a highly advanced client-side simulated AI with preset questions to maintain instant response. For dynamic, personalized, and deep AI responses, connect your Gemini API Key below. Your key stays locally in your browser storage.</p>
+                
+                <div class="form-group">
+                    <label for="gemini-api-key">Gemini API Key (Optional)</label>
+                    <div class="input-password-wrapper">
+                        <input type="password" id="gemini-api-key" placeholder="AIzaSy...">
+                        <button class="icon-btn" id="toggle-key-visibility" title="Show/Hide Key">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                    <small>Get a free API Key from the Google AI Studio console.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="voice-select">Interviewer Voice Accent</label>
+                    <select id="voice-select">
+                        <option value="default">Default Web Accent (Auto-detect)</option>
+                        <!-- Other voices will be dynamically loaded by speech JS -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Voice Output Settings</label>
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <span>Pitch</span>
+                            <span id="pitch-val">1.0</span>
+                        </div>
+                        <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label-row">
+                            <span>Speed / Rate</span>
+                            <span id="rate-val">1.0</span>
+                        </div>
+                        <input type="range" id="voice-rate" min="0.5" max="2" step="0.1" value="1.0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="pill-btn secondary" id="clear-api-key-btn">Clear API Key</button>
+                <button class="pill-btn primary" id="save-settings-btn">Save Configurations</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="secrets.js"></script>
+    <script src="three-scene.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
